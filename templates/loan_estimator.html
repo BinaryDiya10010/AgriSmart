@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Loan Estimator - AgriSmart{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 0;">
+    <h1 class="section-title">Agricultural Loan Estimator</h1>
+    <p class="section-subtitle">Calculate investment needs and ROI for your farming venture</p>
+
+    <div class="form-container">
+        <form method="POST" action="{{ url_for('loan_estimator') }}" id="loanForm">
+
+            <!-- Crop Selection -->
+            <div class="card"
+                style="background: linear-gradient(135deg, rgba(232, 212, 168, 0.2) 0%, var(--warm-cream) 100%); margin-bottom: 2rem;">
+                <h3 style="color: var(--pale-gold); margin-top: 0;">Crop & Farm Details</h3>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Select Crop *</label>
+                        <select name="crop" id="cropSelect" class="form-select" required>
+                            {% for crop in available_crops %}
+                            <option value="{{ crop }}">{{ crop.capitalize() }}</option>
+                            {% endfor %}
+                        </select>
+                        <small style="color: var(--medium-gray); font-size: 0.85rem;">Same 22 crops from Crop
+                            Recommendation</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Select State *</label>
+                        <select name="state" id="stateSelect" class="form-select" required>
+                            {% for state in states_list %}
+                            <option value="{{ state }}">{{ state }}</option>
+                            {% endfor %}
+                        </select>
+                        <small style="color: var(--medium-gray); font-size: 0.85rem;">State for yield calculations</small>
+                    </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loan Parameters -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3 style="color: var(--sage-green); margin-top: 0;">Loan Parameters</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Interest Rate (%)</label>
+                        <input type="number" name="interest_rate" class="form-input" placeholder="6.5" min="0" max="20"
+                            step="0.1" value="6.5" required>
+                        <small style="color: var(--medium-gray); font-size: 0.85rem;">NABARD rate: 6.5%</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Loan Duration (months)</label>
+                        <input type="number" name="loan_duration" class="form-input" placeholder="12" min="1" max="60"
+                            value="12" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="padding: 12px 48px; font-size: 1.1rem; margin-top: 1rem;">
+                    Calculate Loan & ROI
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Information Cards -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 3rem;">
+        <div class="card">
+            <h4 style="color: var(--pale-gold); margin-bottom: 0.5rem;">What We Calculate</h4>
+            <ul style="color: var(--medium-gray); margin: 0; padding-left: 1.5rem;">
+                <li>Total investment required</li>
+                <li>Recommended loan amount (75%)</li>
+                <li>Interest calculations (NABARD rates)</li>
+                <li>Expected revenue \u0026 net profit</li>
+                <li>Return on Investment (ROI)</li>
+                <li>Risk scenario modeling</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h4 style="color: var(--pale-gold); margin-bottom: 0.5rem;">Government Schemes</h4>
+            <ul style="color: var(--medium-gray); margin: 0; padding-left: 1.5rem;">
+                <li>NABARD Kisan Credit Card (4-7% interest)</li>
+                <li>PM-KISAN (₹6,000/year direct benefit)</li>
+                <li>PMFBY (Crop insurance coverage)</li>
+                <li>Subsidy programs (state-specific)</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h4 style="color: var(--pale-gold); margin-bottom: 0.5rem;">Financial Planning</h4>
+            <p style="color: var(--medium-gray); margin: 0;">
+                Get comprehensive financial analysis including best-case/worst-case scenarios, break-even point, and
+                payback period to make informed decisions.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    // Auto-select crop from URL parameter (from crop recommendation)
+    const urlParams = new URLSearchParams(window.location.search);
+    const cropParam = urlParams.get('crop');
+    if (cropParam) {
+        const cropSelect = document.getElementById('cropSelect');
+        // Try to find matching option
+        for (let option of cropSelect.options) {
+            if (option.value.toLowerCase() === cropParam.toLowerCase() ||
+                option.text.toLowerCase().includes(cropParam.toLowerCase())) {
+                cropSelect.value = option.value;
+                // Show success message
+                const msg = document.createElement('div');
+                msg.className = 'alert alert-success';
+                msg.style.marginBottom = '1rem';
+                msg.innerHTML = `Pre-selected crop: <strong>${option.text}</strong> from your recommendations`;
+                document.querySelector('.form-container').insertBefore(msg, document.querySelector('form'));
+                break;
+            }
+        }
+    }
+</script>
+{% endblock %}

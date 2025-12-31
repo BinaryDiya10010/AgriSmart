@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Disease Detection - AgriSmart{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 0;">
+    <h1 class="section-title">Plant Disease Detection</h1>
+    <p class="section-subtitle">Upload a photo of affected leaves for instant AI-powered diagnosis</p>
+
+    <div class="form-container">
+        <form method="POST" action="{{ url_for('disease_detection') }}" enctype="multipart/form-data" id="diseaseForm">
+
+            <!-- Image Upload Section -->
+            <div class="card"
+                style="background: linear-gradient(135deg, rgba(200, 224, 232, 0.2) 0%, var(--warm-cream) 100%); margin-bottom: 2rem;">
+                <h3 style="color: var(--sky-blue); margin-top: 0;">Upload Leaf Image</h3>
+
+                <div class="form-group">
+                    <label class="form-label">Select Image *</label>
+                    <input type="file" id="imageUpload" name="image" class="form-input"
+                        accept="image/png,image/jpeg,image/jpg,image/gif" required>
+                    <small style="color: var(--medium-gray); display: block; margin-top: 0.5rem;">
+                        Supported formats: JPG, PNG, GIF (Max 16MB)
+                    </small>
+                </div>
+
+                <!-- Image Preview -->
+                <div id="imagePreview" style="margin-top: 1rem; text-align: center;">
+                    <!-- Preview will be inserted here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Guidelines -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <h4 style="color: var(--sage-green); margin-top: 0;">💡 Photography Guidelines</h4>
+                <ul style="color: var(--medium-gray); line-height: 1.8;">
+                    <li>✓ Capture the affected leaf clearly</li>
+                    <li>✓ Ensure good lighting (natural daylight preferred)</li>
+                    <li>✓ Avoid shadows on the leaf</li>
+                    <li>✓ Keep camera 10-15cm away from the leaf</li>
+                    <li>✓ Focus on diseased areas</li>
+                    <li>✓ Take multiple angles if unsure</li>
+                </ul>
+            </div>
+
+            <!-- Optional: Crop Type Selection -->
+            <div class="form-group">
+                <label class="form-label">Crop Type (Optional - helps improve accuracy)</label>
+                <select name="crop_type" class="form-select">
+                    <option value="">Auto-detect from image</option>
+                    <option value="Tomato">Tomato</option>
+                    <option value="Potato">Potato</option>
+                    <option value="Wheat">Wheat</option>
+                    <option value="Rice">Rice</option>
+                    <option value="Corn">Corn (Maize)</option>
+                    <option value="Cotton">Cotton</option>
+                    <option value="Soybean">Soybean</option>
+                    <option value="Grape">Grape</option>
+                    <option value="Apple">Apple</option>
+                    <option value="Pepper">Pepper</option>
+                </select>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="form-group">
+                <label class="form-label">Additional Notes (Optional)</label>
+                <textarea name="notes" class="form-textarea"
+                    placeholder="e.g., Leaves showing brown spots, started 3 days ago..." rows="3"></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="text-align: center; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="padding: 12px 48px; font-size: 1.1rem;">
+                    Analyze Disease
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- How It Works -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 3rem;">
+        <div class="card">
+            <h4 style="color: var(--sky-blue); margin-bottom: 0.5rem;">AI Model</h4>
+            <p style="color: var(--medium-gray); margin: 0;">
+                ResNet-50 deep learning model trained on 54,000+ plant disease images from Plant Village dataset with
+                95-99% accuracy.
+            </p>
+        </div>
+
+        <div class="card">
+            <h4 style="color: var(--sky-blue); margin-bottom: 0.5rem;">Processing Time</h4>
+            <p style="color: var(--medium-gray); margin: 0;">
+                Instant analysis (2-3 seconds). Cloud-based inference with offline fallback support for remote areas.
+            </p>
+        </div>
+
+        <div class="card">
+            <h4 style="color: var(--sky-blue); margin-bottom: 0.5rem;">You'll Get</h4>
+            <ul style="color: var(--medium-gray); margin: 0; padding-left: 1.5rem;">
+                <li>Disease name & confidence score</li>
+                <li>Severity assessment</li>
+                <li>Treatment protocol</li>
+                <li>Preventive measures</li>
+                <li>Product recommendations</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Supported Diseases -->
+    <div class="card"
+        style="margin-top: 2rem; background: linear-gradient(135deg, rgba(184, 212, 184, 0.2) 0%, var(--warm-cream) 100%);">
+        <h3 style="color: var(--sage-green); margin-top: 0;">38 Detectable Disease Classes</h3>
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; color: var(--medium-gray); font-size: 0.9rem;">
+            <div>
+                <strong>Tomato:</strong> Early Blight, Late Blight, Leaf Mold, Septoria, Spider Mites, Target Spot,
+                Mosaic Virus, Yellow Curl Virus
+            </div>
+            <div>
+                <strong>Potato:</strong> Early Blight, Late Blight, Healthy
+            </div>
+            <div>
+                <strong>Pepper:</strong> Bacterial Spot, Healthy
+            </div>
+            <div>
+                <strong>Corn:</strong> Cercospora Leaf Spot, Common Rust, Northern Leaf Blight, Healthy
+            </div>
+            <div>
+                <strong>Grape:</strong> Black Rot, Esca, Leaf Blight, Healthy
+            </div>
+            <div>
+                <strong>Apple:</strong> Black Rot, Cedar Rust, Scab, Healthy
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Image preview functionality
+    const imageUpload = document.getElementById('imageUpload');
+    const imagePreview = document.getElementById('imagePreview');
+
+    imageUpload.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+
+        if (file) {
+            // Validate file size (16MB max)
+            if (file.size > 16 * 1024 * 1024) {
+                alert('File size must be less than 16MB');
+                this.value = '';
+                imagePreview.innerHTML = '';
+                return;
+            }
+
+            // Validate file type
+            const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                alert('Please upload a valid image file (PNG, JPG, JPEG, GIF)');
+                this.value = '';
+                imagePreview.innerHTML = '';
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                imagePreview.innerHTML = `
+                    <div style="position: relative; display: inline-block;">
+                        <img src="${e.target.result}" 
+                             style="max-width: 100%; max-height: 400px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        <div style="position: absolute; top: 10px; right: 10px; background: var(--sage-green); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                            Image Ready
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--medium-gray); font-size: 0.9rem;">
+                        ${file.name} (${(file.size / 1024).toFixed(1)} KB)
+                    </p>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Form submission loading state
+    document.getElementById('diseaseForm').addEventListener('submit', function () {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = 'Analyzing...';
+        submitBtn.disabled = true;
+    });
+</script>
+{% endblock %}

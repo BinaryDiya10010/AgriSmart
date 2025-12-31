@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AgriSmart{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('index') }}" class="navbar-brand">AgriSmart</a>
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('crop_recommendation') }}">Crop Recommendation</a></li>
+                <li><a href="{{ url_for('disease_detection') }}">Disease Detection</a></li>
+                <li><a href="{{ url_for('loan_estimator') }}">Loan Estimator</a></li>
+                <li><a href="{{ url_for('storage_register') }}">Storage Management</a></li>
+                <li><a href="{{ url_for('knowledge_hub') }}">Knowledge Hub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container" style="margin-top: 2rem;">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>AgriSmart</h3>
+                    <p>Empowering farmers with AI-driven agricultural insights and recommendations.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Features</h3>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('crop_recommendation') }}">Crop Recommendation</a></li>
+                        <li><a href="{{ url_for('disease_detection') }}">Disease Detection</a></li>
+                        <li><a href="{{ url_for('loan_estimator') }}">Loan Estimator</a></li>
+                        <li><a href="{{ url_for('storage_register') }}">Storage Management</a></li>
+                        <li><a href="{{ url_for('knowledge_hub') }}">Knowledge Hub</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Government Schemes</h3>
+                    <ul class="footer-links">
+                        <li><a href="https://pmkisan.gov.in" target="_blank">PM-KISAN</a></li>
+                        <li><a href="https://pmfby.gov.in" target="_blank">PMFBY</a></li>
+                        <li><a href="https://www.enam.gov.in" target="_blank">e-NAM</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>Email: support@agrismartai.com</p>
+                    <p>Phone: 1800-XXX-XXXX</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AgriSmart. All rights reserved. | Made with care for Indian Farmers</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <!-- Chart.js for price visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

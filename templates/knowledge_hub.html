@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}Knowledge Hub - AgriSmart{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 0;">
+    <h1 class="section-title">Agricultural Knowledge Hub</h1>
+    <p class="section-subtitle">Live Market Prices & Agricultural Information</p>
+
+    <!-- Filters Section -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: var(--sage-green); margin-top: 0;">Filter Market Prices</h3>
+        <form method="GET" action="{{ url_for('knowledge_hub') }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">State</label>
+                    <select name="state" class="form-select" onchange="this.form.submit()">
+                        <option value="">All States</option>
+                        {% for state in states_list %}
+                        <option value="{{ state }}" {% if filter_state==state %}selected{% endif %}>{{ state }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% if filter_state %}
+                <div class="form-group">
+                    <label class="form-label">District</label>
+                    <select name="district" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Districts</option>
+                        {% for district in districts_list %}
+                        <option value="{{ district }}" {% if filter_district==district %}selected{% endif %}>{{ district
+                            }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label class="form-label">Commodity Search</label>
+                    <input type="text" name="commodity" class="form-input" placeholder="e.g., Wheat"
+                        value="{{ filter_commodity }}">
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Search</button>
+                    <a href="{{ url_for('knowledge_hub') }}" class="btn btn-secondary"
+                        style="width: 100%; margin-left: 0.5rem;">Clear</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Summary -->
+    {% if data_loaded %}
+    <div class="alert alert-success" style="margin-bottom: 2rem;">
+        Showing {{ total_records }} market price records
+        {% if filter_state %} in {{ filter_state }}{% endif %}
+        {% if filter_district %}, {{ filter_district }}{% endif %}
+        {% if filter_commodity %} for "{{ filter_commodity }}"{% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Market Prices Table -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: var(--sage-green); margin-top: 0;">Daily Mandi Prices</h3>
+
+        {% if latest_prices %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: var(--sage-green); color: white;">
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid var(--light-gray);">#</th>
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid var(--light-gray);">Commodity
+                        </th>
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid var(--light-gray);">Market</th>
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid var(--light-gray);">District
+                        </th>
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid var(--light-gray);">State</th>
+                        <th style="padding: 0.75rem; text-align: right; border: 1px solid var(--light-gray);">Min Price
+                            (₹)</th>
+                        <th style="padding: 0.75rem; text-align: right; border: 1px solid var(--light-gray);">Max Price
+                            (₹)</th>
+                        <th style="padding: 0.75rem; text-align: right; border: 1px solid var(--light-gray);">Modal
+                            Price (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for price in latest_prices %}
+                    <tr style="{% if loop.index % 2 == 0 %}background: var(--warm-cream);{% endif %}">
+                        <td style="padding: 0.75rem; border: 1px solid var(--light-gray);">{{ loop.index }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid var(--light-gray); font-weight: 600;">{{
+                            price.Commodity }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid var(--light-gray);">{{ price.Market }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid var(--light-gray);">{{ price.District }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid var(--light-gray);">{{ price.State }}</td>
+                        <td style="padding: 0.75rem; text-align: right; border: 1px solid var(--light-gray);">{{
+                            "%.2f"|format(price.Min_Price) }}</td>
+                        <td style="padding: 0.75rem; text-align: right; border: 1px solid var(--light-gray);">{{
+                            "%.2f"|format(price.Max_Price) }}</td>
+                        <td
+                            style="padding: 0.75rem; text-align: right; border: 1px solid var(--light-gray); font-weight: 700; color: var(--sage-green);">
+                            {{ "%.2f"|format(price.Modal_Price) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            No market prices found. Try adjusting your filters.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Interactive Charts Section -->
+    {% if all_commodities_data %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: var(--sage-green); margin-top: 0;">Commodity Price Trends</h3>
+        
+        <!-- Commodity Selector -->
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label" style="font-weight: 600;">Select Commodity to View Price Trend:</label>
+            <select id="commoditySelector" class="form-select" style="max-width: 400px;">
+                <option value="">-- Choose a Commodity --</option>
+                {% for commodity in commodities_list %}
+                <option value="{{ commodity }}">{{ commodity }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Price Trend Chart -->
+        <div id="trendChartContainer" style="display: none;">
+            <h4 id="trendChartTitle" style="color: var(--medium-gray); font-size: 1.1rem; margin-bottom: 1rem;"></h4>
+            <div style="position: relative; height: 400px;">
+                <canvas id="commodityTrendChart"></canvas>
+            </div>
+            <div id="trendStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" style="display: none; text-align: center; padding: 2rem; color: var(--medium-gray);">
+            <div style="font-size: 2rem;">...</div>
+            <div>Loading price data...</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Top Commodities with Animation -->
+    {% if top_commodities %}
+    <div class="card">
+        <h3 style="color: var(--pale-gold); margin-top: 0;">Top 10 Highest Priced Commodities</h3>
+        <div class="top-commodities-slider" style="overflow: hidden; position: relative; height: 220px;">
+            <div class="slider-track" style="display: flex; animation: scroll 30s linear infinite;">
+                {% for commodity in top_commodities %}
+                <div class="commodity-card"
+                    style="background: var(--warm-cream); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--pale-gold); min-width: 280px; margin-right: 1rem; flex-shrink: 0; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                    <div style="font-size: 0.85rem; color: var(--medium-gray);">{{ commodity.Market }}, {{ commodity.State }}</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--dark-charcoal); margin: 0.25rem 0;">{{ commodity.Commodity }}</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--pale-gold);">₹{{ "{:,.2f}".format(commodity.Modal_Price) }}</div>
+                    <div style="font-size: 0.8rem; color: var(--medium-gray);">/quintal</div>
+                </div>
+                {% endfor %}
+                <!-- Duplicate items for seamless loop -->
+                {% for commodity in top_commodities %}
+                <div class="commodity-card"
+                    style="background: var(--warm-cream); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--pale-gold); min-width: 280px; margin-right: 1rem; flex-shrink: 0; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                    <div style="font-size: 0.85rem; color: var(--medium-gray);">{{ commodity.Market }}, {{ commodity.State }}</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--dark-charcoal); margin: 0.25rem 0;">{{ commodity.Commodity }}</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--pale-gold);">₹{{ "{:,.2f}".format(commodity.Modal_Price) }}</div>
+                    <div style="font-size: 0.8rem; color: var(--medium-gray);">/quintal</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+        
+        .top-commodities-slider:hover .slider-track {
+            animation-play-state: paused;
+        }
+        
+        .commodity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+    {% endif %}
+
+    <!-- Data Info -->
+    <div class="card"
+        style="margin-top: 2rem; background: linear-gradient(135deg, rgba(184, 212, 184, 0.2) 0%, var(--warm-cream) 100%);">
+        <h3 style="color: var(--sage-green); margin-top: 0;">About This Data</h3>
+        <p style="color: var(--medium-gray); margin-bottom: 0.5rem;">
+            <strong>Data Source:</strong> Agricultural Market Price Database (8,210 records)
+        </p>
+        <p style="color: var(--medium-gray); margin-bottom: 0.5rem;">
+            <strong>Coverage:</strong> {{ states_list|length }} states, {{ commodities_list|length }} commodities
+        </p>
+        <p style="color: var(--medium-gray); margin-bottom: 0;">
+            <strong>Update Frequency:</strong> Real-time market data integration
+        </p>
+    </div>
+</div>
+
+{% block extra_js %}
+{% if all_commodities_data %}
+<script>
+    let trendChart = null;
+
+    // Commodity Selector Change Handler
+    document.getElementById('commoditySelector').addEventListener('change', async function() {
+        const commodity = this.value;
+        
+        if (!commodity) {
+            document.getElementById('trendChartContainer').style.display = 'none';
+            return;
+        }
+
+        // Show loading indicator
+        document.getElementById('loadingIndicator').style.display = 'block';
+        document.getElementById('trendChartContainer').style.display = 'none';
+
+        try {
+            // Fetch commodity trend data from API
+            const response = await fetch(`/api/commodity-trend/${encodeURIComponent(commodity)}`);
+            const data = await response.json();
+
+            if (data.error) {
+                alert('Error loading commodity data: ' + data.error);
+                return;
+            }
+
+            // Hide loading, show chart
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('trendChartContainer').style.display = 'block';
+
+            // Update chart title
+            document.getElementById('trendChartTitle').textContent = `${commodity} - State-wise Price Comparison (Top 15 States)`;
+
+            // Update statistics
+            document.getElementById('trendStats').innerHTML = `
+                <div style="background: var(--warm-cream); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 0.25rem;">Average Price</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--sage-green);">₹${data.overall_avg.toLocaleString('en-IN')}</div>
+                </div>
+                <div style="background: var(--warm-cream); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 0.25rem;">Minimum Price</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #e74c3c;">₹${data.overall_min.toLocaleString('en-IN')}</div>
+                </div>
+                <div style="background: var(--warm-cream); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 0.25rem;">Maximum Price</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #27ae60;">₹${data.overall_max.toLocaleString('en-IN')}</div>
+                </div>
+                <div style="background: var(--warm-cream); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 0.25rem;">Total Records</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--pale-gold);">${data.total_records}</div>
+                </div>
+            `;
+
+            // Destroy existing chart if any
+            if (trendChart) {
+                trendChart.destroy();
+            }
+
+            // Create new chart
+            const ctx = document.getElementById('commodityTrendChart');
+            trendChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.states,
+                    datasets: [
+                        {
+                            label: 'Modal Price',
+                            data: data.modal_prices,
+                            backgroundColor: 'rgba(184, 212, 184, 0.8)',
+                            borderColor: 'rgba(157, 180, 157, 1)',
+                            borderWidth: 2,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Min Price Range',
+                            data: data.min_prices,
+                            backgroundColor: 'rgba(231, 76, 60, 0.3)',
+                            borderColor: 'rgba(231, 76, 60, 0.6)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Max Price Range',
+                            data: data.max_prices,
+                            backgroundColor: 'rgba(39, 174, 96, 0.3)',
+                            borderColor: 'rgba(39, 174, 96, 0.6)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                boxWidth: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ₹' + context.parsed.y.toLocaleString('en-IN');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString('en-IN');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+        } catch (error) {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            alert('Error fetching commodity data: ' + error.message);
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}
+
+{% endblock %}

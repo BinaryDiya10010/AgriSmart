@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Storage Management - AgriSmart{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 0;">
+    <h1 class="section-title">Crop Storage Management</h1>
+    <p class="section-subtitle">Register your harvest for smart shelf-life monitoring and sell recommendations</p>
+
+    <!-- Inventory Display Section -->
+    {% if inventory %}
+    <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(184, 212, 184, 0.2) 0%, var(--warm-cream) 100%);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="color: var(--sage-green); margin: 0;">Current Inventory ({{ inventory|length }} batches)</h3>
+            <button onclick="toggleForm()" class="btn btn-primary" style="padding: 8px 16px;">
+                Add New Batch
+            </button>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: var(--sage-green); color: white;">
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid var(--light-gray);">ID</th>
+                        <th style="padding: 0.75rem; text-align: left; border: 1px solid var(--light-gray);">Crop Type</th>
+                        <th style="padding: 0.75rem; text-align: right; border: 1px solid var(--light-gray);">Quantity (Q)</th>
+                        <th style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">Harvest Date</th>
+                        <th style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">Storage Date</th>
+                        <th style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">Temp (°C)</th>
+                        <th style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">Humidity (%)</th>
+                        <th style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">Storage Type</th>
+                        <th style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">Status</th>
+                        <th style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for batch in inventory %}
+                    <tr style="{% if loop.index % 2 == 0 %}background: var(--warm-cream);{% endif %}">
+                        <td style="padding: 0.75rem; border: 1px solid var(--light-gray); font-weight: 600;">#{{ batch.id }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid var(--light-gray); font-weight: 600;">{{ batch.crop_type }}</td>
+                        <td style="padding: 0.75rem; text-align: right; border: 1px solid var(--light-gray);">{{ "%.1f"|format(batch.quantity) }}</td>
+                        <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">{{ batch.harvest_date }}</td>
+                        <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">{{ batch.storage_date }}</td>
+                        <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">{{ "%.1f"|format(batch.temperature) }}</td>
+                        <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">{{ "%.0f"|format(batch.humidity) }}</td>
+                        <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">{{ batch.storage_type }}</td>
+                        <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">
+                            <span style="padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;
+                                {% if batch.status == 'GREEN' %}background: #d4edda; color: #155724;
+                                {% elif batch.status == 'YELLOW' %}background: #fff3cd; color: #856404;
+                                {% elif batch.status == 'ORANGE' %}background: #ffe5cc; color: #cc5200;
+                                {% else %}background: #f8d7da; color: #721c24;{% endif %}">
+                                {{ batch.status }}
+                            </span>
+                        </td>
+                        <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">
+                            <a href="{{ url_for('storage_dashboard', batch_id=batch.id) }}" 
+                               style="padding: 4px 12px; background: var(--sky-blue); color: white; text-decoration: none; border-radius: 4px; font-size: 0.85rem; margin-right: 0.25rem;">
+                                View
+                            </a>
+                            <form method="POST" action="{{ url_for('storage_delete', batch_id=batch.id) }}" style="display: inline;" 
+                                  onsubmit="return confirm('Are you sure you want to delete this batch?');">
+                                <button type="submit" style="padding: 4px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="form-container" id="addBatchForm" style="{% if inventory %}display: none;{% endif %}">
+        <form method="POST" action="{{ url_for('storage_register') }}">
+
+            <!-- Crop Information -->
+            <div class="card"
+                style="background: linear-gradient(135deg, rgba(200, 224, 232, 0.2) 0%, var(--warm-cream) 100%); margin-bottom: 2rem;">
+                <h3 style="color: var(--sky-blue); margin-top: 0;">Crop Details</h3>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Crop Type *</label>
+                        <select name="crop_type" class="form-select" required>
+                            <option value="">Select crop</option>
+                            <option value="Wheat">Wheat (गेहूं)</option>
+                            <option value="Rice">Rice (चावल)</option>
+                            <option value="Chickpea">Chickpea (चना)</option>
+                            <option value="Soybean">Soybean (सोयाबीन)</option>
+                            <option value="Cotton">Cotton (कपास)</option>
+                            <option value="Corn">Corn (मक्का)</option>
+                            <option value="Potato">Potato (आलू)</option>
+                            <option value="Onion">Onion (प्याज)</option>
+                            <option value="Tomato">Tomato (टमाटर)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Quantity (Quintals) *</label>
+                        <input type="number" name="quantity" class="form-input" placeholder="e.g., 100" min="1"
+                            max="10000" step="0.1" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dates -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3 style="color: var(--sage-green); margin-top: 0;">Timeline</h3>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Harvest Date *</label>
+                        <input type="date" name="harvest_date" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Storage Start Date *</label>
+                        <input type="date" name="storage_date" class="form-input" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Storage Conditions -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3 style="color: var(--sage-green); margin-top: 0;">Current Storage Conditions</h3>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Temperature (°C) *</label>
+                        <input type="number" name="temperature" class="form-input" placeholder="e.g., 22" min="-10"
+                            max="50" step="0.1" value="22" required>
+                        <small style="color: var(--medium-gray); display: block; margin-top: 0.25rem;">
+                            Optimal: 18-22°C
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Humidity (%) *</label>
+                        <input type="number" name="humidity" class="form-input" placeholder="e.g., 68" min="0" max="100"
+                            step="1" value="68" required>
+                        <small style="color: var(--medium-gray); display: block; margin-top: 0.25rem;">
+                            Optimal: 50-70%
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Storage Type *</label>
+                        <select name="storage_type" class="form-select" required>
+                            <option value="Cooperative">Cooperative Warehouse</option>
+                            <option value="Private">Private Warehouse</option>
+                            <option value="Cold Storage">Cold Storage</option>
+                            <option value="Farm Storage">On-farm Storage</option>
+                            <option value="Open">Open Storage</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="text-align: center; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="padding: 12px 48px; font-size: 1.1rem;">
+                    Register Batch & Start Monitoring
+                </button>
+                {% if inventory %}
+                <button type="button" onclick="toggleForm()" class="btn btn-secondary" style="padding: 12px 48px; font-size: 1.1rem; margin-left: 1rem;">
+                    Cancel
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Information -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 3rem;">
+        <div class="card">
+            <h4 style="color: var(--sky-blue); margin-bottom: 0.5rem;">Smart Alerts</h4>
+            <ul style="color: var(--medium-gray); margin: 0; padding-left: 1.5rem;">
+                <li>GREEN: Optimal conditions, no action</li>
+                <li>YELLOW: Monitor closely, 60% shelf-life</li>
+                <li>ORANGE: Sell soon, 80% shelf-life</li>
+                <li>RED: Immediate action, 90%+ shelf-life</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h4 style="color: var(--sky-blue); margin-bottom: 0.5rem;">Market Integration</h4>
+            <p style="color: var(--medium-gray); margin: 0;">
+                Real-time mandi price tracking helps you decide the best time to sell. Get notifications when prices
+                spike!
+            </p>
+        </div>
+
+        <div class="card">
+            <h4 style="color: var(--sky-blue); margin-bottom: 0.5rem;">Shelf-Life Algorithm</h4>
+            <p style="color: var(--medium-gray); margin: 0;">
+                AI calculates remaining storage time based on crop type, temperature, humidity, and historical data.
+                Accuracy: 92%+
+            </p>
+        </div>
+    </div>
+
+    <!-- Optimal Storage Guidelines -->
+    <div class="card"
+        style="margin-top: 2rem; background: linear-gradient(135deg, rgba(184, 212, 184, 0.2) 0%, var(--warm-cream) 100%);">
+        <h3 style="color: var(--sage-green); margin-top: 0;">Optimal Storage Guidelines</h3>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <tr style="background: var(--light-gray);">
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid var(--light-gray);">Crop</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">Temperature</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">Humidity</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">Max Storage</th>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; border: 1px solid var(--light-gray);"><strong>Wheat</strong></td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">15-20°C</td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">60-65%</td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">12 months</td>
+            </tr>
+            <tr style="background: var(--warm-cream);">
+                <td style="padding: 0.75rem; border: 1px solid var(--light-gray);"><strong>Rice</strong></td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">18-22°C</td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">55-60%</td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">8-10 months</td>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; border: 1px solid var(--light-gray);"><strong>Chickpea</strong></td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">20-25°C</td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">50-60%</td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">10 months</td>
+            </tr>
+            <tr style="background: var(--warm-cream);">
+                <td style="padding: 0.75rem; border: 1px solid var(--light-gray);"><strong>Potato</strong></td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">2-4°C</td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">90-95%</td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">3-4 months</td>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; border: 1px solid var(--light-gray);"><strong>Onion</strong></td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">0-2°C</td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">65-70%</td>
+                <td style="padding: 0.75rem; text-align: center; border: 1px solid var(--light-gray);">6-8 months</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+function toggleForm() {
+    const form = document.getElementById('addBatchForm');
+    if (form.style.display === 'none') {
+        form.style.display = 'block';
+        form.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        form.style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+</script>
+{% endblock %}

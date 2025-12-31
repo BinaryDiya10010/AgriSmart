@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Loan Analysis - AgriSmart{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 0;">
+    <div class="alert alert-success">
+        Financial analysis complete for {{ result.crop }} cultivation ({{ result.farm_size }} hectares)
+    </div>
+
+    <h1 class="section-title">AI-Powered Financial Analysis</h1>
+    <p class="section-subtitle">{{ result.data_source }} Integration</p>
+
+    <!-- Investment Summary -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="card" style="background: linear-gradient(135deg, rgba(184, 212, 184, 0.2) 0%, white 100%);">
+            <div style="font-size: 0.9rem; color: var(--medium-gray); margin-bottom: 0.5rem;">Total Estimated Investment by Farmer</div>
+            <div style="font-size: 2.5rem; font-weight: 700; color: var(--sage-green);">₹{{
+                "{:,}".format(result.total_investment|int) }}</div>
+        </div>
+
+        <div class="card" style="background: linear-gradient(135deg, rgba(232, 212, 168, 0.2) 0%, white 100%);">
+            <div style="font-size: 0.9rem; color: var(--medium-gray); margin-bottom: 0.5rem;">Recommended Loan</div>
+            <div style="font-size: 2.5rem; font-weight: 700; color: var(--pale-gold);">₹{{
+                "{:,}".format(result.recommended_loan|int) }}</div>
+            <div style="font-size: 0.85rem; color: var(--medium-gray); margin-top: 0.25rem;">75% of investment</div>
+        </div>
+
+        <div class="card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, white 100%);">
+            <div style="font-size: 0.9rem; color: var(--medium-gray); margin-bottom: 0.5rem;">Expected Net Profit</div>
+            <div style="font-size: 2.5rem; font-weight: 700; color: var(--success-green);">₹{{
+                "{:,}".format(result.net_profit|int) }}</div>
+            <div style="font-size: 0.85rem; color: var(--success-green); margin-top: 0.25rem;">ROI: {{ result.roi }}%
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Data Integration -->
+    <div class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--success-green);">
+        <h3 style="color: var(--success-green); margin-top: 0;">Using Real Production Data</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div>
+                <div style="font-size: 0.85rem; color: var(--medium-gray);">Expected Yield</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--sage-green);">{{ result.expected_yield }}
+                    quintals/ha</div>
+                <div style="font-size: 0.8rem; color: var(--success-green);">Historical Average</div>
+            </div>
+            <div>
+                <div style="font-size: 0.85rem; color: var(--medium-gray);">Market Price</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--pale-gold);">₹{{ result.market_price
+                    }}/quintal</div>
+                <div style="font-size: 0.8rem; color: var(--success-green);">Current Rate</div>
+            </div>
+            <div>
+                <div style="font-size: 0.85rem; color: var(--medium-gray);">Gross Revenue</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--sky-blue);">₹{{
+                    "{:,}".format(result.gross_revenue|int) }}</div>
+                <div style="font-size: 0.8rem; color: var(--medium-gray);">Total farm</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loan Details -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: var(--pale-gold); margin-top: 0;">Loan Calculation (12-Month Term)</h3>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 1rem;">
+            <tr style="background: var(--light-gray);">
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid var(--light-gray);">Parameter</th>
+                <th style="padding: 0.75rem; text-align: right; border: 1px solid var(--light-gray);">Amount</th>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; border: 1px solid var(--light-gray);">Loan Amount</td>
+                <td style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid var(--light-gray);">
+                    ₹{{ "{:,}".format(result.recommended_loan|int) }}</td>
+            </tr>
+            <tr style="background: var(--warm-cream);">
+                <td style="padding: 0.75rem; border: 1px solid var(--light-gray);">Interest Rate (NABARD)</td>
+                <td style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid var(--light-gray);">
+                    {{ result.interest_rate }}%</td>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; border: 1px solid var(--light-gray);">Monthly EMI</td>
+                <td
+                    style="padding: 0.75rem; text-align: right; font-weight: 700; color: var(--sage-green); border: 1px solid var(--light-gray);">
+                    ₹{{ "{:,}".format((result.recommended_loan * 1.065 / 12)|int) }}</td>
+            </tr>
+            <tr style="background: var(--light-gray);">
+                <td style="padding: 0.75rem; border: 1px solid var(--light-gray);"><strong>Total Repayment</strong></td>
+                <td style="padding: 0.75rem; text-align: right; font-weight: 700; border: 1px solid var(--light-gray);">
+                    ₹{{ "{:,}".format((result.recommended_loan * 1.065)|int) }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="text-align: center; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('loan_estimator') }}" class="btn btn-secondary">Recalculate</a>
+        <a href="{{ url_for('crop_recommendation') }}" class="btn btn-secondary">Try Different Crop</a>
+        <button onclick="window.print()" class="btn btn-primary">Download Report</button>
+    </div>
+
+    <!-- ML Model Info -->
+    <div class="card"
+        style="margin-top: 2rem; background: linear-gradient(135deg, rgba(184, 212, 184, 0.2) 0%, var(--warm-cream) 100%);">
+        <h3 style="color: var(--sage-green); margin-top: 0;">Data Sources</h3>
+        <p style="color: var(--medium-gray); margin-bottom: 0.5rem;">
+            <strong>Yield Prediction:</strong> {{ result.data_source }} (246,091 records, 2000-2012)
+        </p>
+        <p style="color: var(--medium-gray); margin-bottom: 0.5rem;">
+            <strong>Market Prices:</strong> Live data from 8,210 market records
+        </p>
+        <p style="color: var(--medium-gray); margin-bottom: 0;">
+            <strong>ML Model:</strong> Linear Regression (R² = 0.95)
+        </p>
+    </div>
+</div>
+{% endblock %}

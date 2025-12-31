@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Database
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+
+# Uploaded Files
+static/uploads/*
+!static/uploads/.gitkeep
+
+# ML Models (large files)
+models/**/*.h5
+models/**/*.pkl
+models/**/prophet_models/
+
+# Large Dataset Images (train/test/validation folders)
+datasets/Train/
+datasets/Test/
+datasets/Validation/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Distribution
+dist/
+build/
+*.egg-info/

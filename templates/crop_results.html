@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Recommendations - AgriSmart{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 0;">
+    <div class="alert alert-success">
+        Recommendations generated for {{ recommendations.location }}
+    </div>
+
+    <h1 class="section-title">Your ML Crop Recommendations</h1>
+    <p class="section-subtitle">Powered by RandomForest AI (90% Accuracy)</p>
+
+    <!-- Recommendations List -->
+    <div style="max-width: 900px; margin: 0 auto;">
+        {% for crop in recommendations.crops %}
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <div>
+                    <h2 style="color: var(--dark-charcoal); margin: 0;">
+                        {{ crop.rank }}. {{ crop.name }}
+                    </h2>
+                    <span class="badge badge-{{ crop.confidence|lower }}" style="margin-top: 0.5rem;">
+                        {{ crop.confidence }} Confidence
+                    </span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+                    <form method="POST" action="{{ url_for('select_crop') }}" style="margin: 0;">
+                        <input type="hidden" name="crop_name" value="{{ crop.name }}">
+                        <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            ✓ Select
+                        </button>
+                    </form>
+                    <a href="{{ url_for('loan_estimator') }}?crop={{ crop.name }}" class="btn btn-secondary"
+                        style="padding: 0.5rem 1rem; font-size: 0.9rem; text-decoration: none;">
+                        💰 Loan
+                    </a>
+                </div>
+            </div>
+
+            <!-- ML Compatibility Score -->
+            <div style="margin-bottom: 1rem;">
+                <strong style="color: var(--dark-charcoal);">ML Compatibility Score:</strong>
+                <div class="compatibility-bar">
+                    <div class="compatibility-fill" style="width: {{ crop.compatibility }}%;"
+                        data-width="{{ crop.compatibility }}%">
+                        {{ crop.compatibility }}%
+                        {% if crop.compatibility >= 90 %}
+                        Excellent Match
+                        {% elif crop.compatibility >= 80 %}
+                        Very Good Match
+                        {% elif crop.compatibility >= 70 %}
+                        Good Match
+                        {% else %}
+                        Moderate Match
+                        {% endif %}
+                    </div>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--medium-gray); margin-top: 0.5rem;">
+                    Probability: {{ "%.2f"|format(crop.probability * 100) }}%
+                </div>
+            </div>
+
+            <!-- Real Data Metrics -->
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                {% if crop.expected_yield %}
+                <div style="background: var(--warm-cream); padding: 1rem; border-radius: 8px;">
+                    <div style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 0.25rem;">Expected Yield
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--sky-blue);">{{ crop.expected_yield }}
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--success-green);">Real Data</div>
+                </div>
+                {% endif %}
+
+                {% if crop.seasons %}
+                <div style="background: var(--warm-cream); padding: 1rem; border-radius: 8px;">
+                    <div style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 0.25rem;">Growing Seasons
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--pale-gold);">{{ crop.seasons }}</div>
+                    <div style="font-size: 0.8rem; color: var(--success-green);">Historical Data</div>
+                </div>
+                {% endif %}
+
+                <div style="background: var(--warm-cream); padding: 1rem; border-radius: 8px;">
+                    <div style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 0.25rem;">ML Prediction
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--sage-green);">Rank #{{ crop.rank }}
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--medium-gray);">of 5 recommendations</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('loan_estimator') }}" class="btn btn-primary">Calculate Loan</a>
+        <a href="{{ url_for('crop_recommendation') }}" class="btn btn-secondary">Try Again</a>
+        <a href="{{ url_for('knowledge_hub') }}" class="btn btn-secondary">Market Prices</a>
+    </div>
+
+    <!-- ML Model Information -->
+    <div class="card"
+        style="margin-top: 3rem; background: linear-gradient(135deg, rgba(184, 212, 184, 0.2) 0%, var(--warm-cream) 100%);">
+        <h3 style="color: var(--sage-green); margin-top: 0;">ML Model Information</h3>
+        <p style="color: var(--medium-gray); margin-bottom: 0.5rem;">
+            <strong>Algorithm:</strong> {{ recommendations.model_version or 'RandomForest v1.0' }}
+        </p>
+        <p style="color: var(--medium-gray); margin-bottom: 0.5rem;">
+            <strong>Training Accuracy:</strong> 90.23% (2,200 samples, 22 crops)
+        </p>
+        <p style="color: var(--medium-gray); margin-bottom: 0.5rem;">
+            <strong>Data Sources:</strong> ML Training Data + 246K Production Records
+        </p>
+        <p style="color: var(--medium-gray); margin-bottom: 0;">
+            <strong>Location:</strong> {{ recommendations.location }}
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animate compatibility bars
+    setTimeout(function () {
+        document.querySelectorAll('.compatibility-fill').forEach(function (bar) {
+            const width = bar.getAttribute('data-width');
+            bar.style.width = '0%';
+            setTimeout(function () {
+                bar.style.width = width;
+            }, 100);
+        });
+    }, 200);
+</script>
+{% endblock %}

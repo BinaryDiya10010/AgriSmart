@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}AgriSmart - किसानों के लिए डिजिटल सलाहकार{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">AgriSmart</h1>
+        <p class="hero-tagline">Smart AI-Powered Digital Assistant for Farmers</p>
+        <p class="hero-tagline" style="font-size: 1rem;">Crop Recommendations • Financial Planning • Disease Detection
+        </p>
+
+        <div class="hero-buttons">
+            <a href="{{ url_for('disease_detection') }}" class="btn btn-primary">Upload Photo</a>
+            <a href="{{ url_for('crop_recommendation') }}" class="btn btn-secondary">Enter Data</a>
+            <a href="#features" class="btn btn-tertiary">Explore</a>
+        </div>
+    </div>
+
+    <!-- Hero Image Carousel with Auto-rotation -->
+    <div class="hero-image">
+        <div class="carousel-container" id="heroCarousel">
+            <!-- Slide 1: Farmer in Golden Wheat Field -->
+            <div class="carousel-slide active">
+                <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&h=600&fit=crop"
+                    alt="Indian farmer in golden wheat field"
+                    onerror="this.src='https://via.placeholder.com/800x600/2D8A3E/FFFFFF?text=Wheat+Farming'">
+            </div>
+            <!-- Slide 2: Fresh Harvest at Market -->
+            <div class="carousel-slide">
+                <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=800&h=600&fit=crop"
+                    alt="Fresh harvested crops at market"
+                    onerror="this.src='https://via.placeholder.com/800x600/1E88E5/FFFFFF?text=Fresh+Harvest'">
+            </div>
+            <!-- Slide 3: Modern Farming Techniques -->
+            <div class="carousel-slide">
+                <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800&h=600&fit=crop"
+                    alt="Farmer checking plant health"
+                    onerror="this.src='https://via.placeholder.com/800x600/FFA726/FFFFFF?text=Smart+Farming'">
+            </div>
+            <!-- Slide 4: Expansive Green Farmland -->
+            <div class="carousel-slide">
+                <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop"
+                    alt="Aerial view of lush green crop fields"
+                    onerror="this.src='https://via.placeholder.com/800x600/00C853/FFFFFF?text=Green+Fields'">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Success Stories Section -->
+<section class="success-stories">
+    <div class="container">
+        <h2 class="section-title">How We've Helped Farmers</h2>
+        <p class="section-subtitle">Thousands of Success Stories Across India</p>
+
+        <div class="testimonial-grid">
+            <!-- Success Story 1: Rajesh Patel from Madhya Pradesh -->
+            <div class="testimonial-card">
+                <img src="https://images.unsplash.com/photo-1595246140625-573b715d11dc?w=400&h=300&fit=crop" 
+                     alt="Happy farmer in wheat field" 
+                     class="testimonial-image"
+                     onerror="this.src='https://via.placeholder.com/400x300/2D8A3E/FFFFFF?text=Farmer+Success+Story'">
+                <p class="testimonial-text">"Increased yield by 35% using crop recommendation. The AI suggested wheat
+                    perfectly for my soil!"</p>
+                <p class="testimonial-author">- Rajesh Patel, Madhya Pradesh (4.8 Rating)</p>
+            </div>
+
+            <!-- Success Story 2: Priya Kumar from Karnataka -->
+            <div class="testimonial-card">
+                <img src="https://images.unsplash.com/photo-1628352081506-83c43123ed6d?w=400&h=300&fit=crop" 
+                     alt="Female farmer checking crops" 
+                     class="testimonial-image"
+                     onerror="this.src='https://via.placeholder.com/400x300/1E88E5/FFFFFF?text=Disease+Detection+Success'">
+                <p class="testimonial-text">"Saved ₹15,000 through early disease detection. The app identified leaf
+                    blight before it spread."</p>
+                <p class="testimonial-author">- Priya Kumar, Karnataka (4.9 Rating)</p>
+            </div>
+
+            <!-- Success Story 3: Vikram Singh from Punjab -->
+            <div class="testimonial-card">
+                <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=400&h=300&fit=crop" 
+                     alt="Farmer with harvested crops" 
+                     class="testimonial-image"
+                     onerror="this.src='https://via.placeholder.com/400x300/FFA726/FFFFFF?text=Market+Success'">
+                <p class="testimonial-text">"Got better prices on e-NAM platform. Market insights helped me time my
+                    sales perfectly."</p>
+                <p class="testimonial-author">- Vikram Singh, Punjab (4.7 Rating)</p>
+            </div>
+
+            <!-- Success Story 4: Suresh Reddy from Andhra Pradesh -->
+            <div class="testimonial-card">
+                <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=300&fit=crop" 
+                     alt="Crop storage facility" 
+                     class="testimonial-image"
+                     onerror="this.src='https://via.placeholder.com/400x300/00C853/FFFFFF?text=Storage+Success'">
+                <p class="testimonial-text">"Never faced storage losses again. The alert system saved my entire harvest
+                    last season."</p>
+                <p class="testimonial-author">- Suresh Reddy, Andhra Pradesh (4.9 Rating)</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">Farmers</div>
+                <div class="stat-number">47,000+</div>
+                <div class="stat-label">Farmers Helped</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">Growth</div>
+                <div class="stat-number">+28%</div>
+                <div class="stat-label">Avg Yield Improvement</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">Income</div>
+                <div class="stat-number">₹3.2 Cr</div>
+                <div class="stat-label">Income Generated</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features">
+    <div class="container">
+        <h2 class="section-title">Our Features</h2>
+        <p class="section-subtitle">Comprehensive AI-powered tools for modern farming</p>
+
+        <div class="features-grid">
+            <!-- Feature 1: Crop Recommendation -->
+            <div class="feature-card">
+                <div class="feature-icon">Crops</div>
+                <h3 class="feature-title">Crop Recommendation</h3>
+                <p class="feature-description">Smart AI suggests best crops based on your soil, weather & market demand
+                </p>
+                <ul class="feature-list">
+                    <li>Soil report scanning</li>
+                    <li>Manual data entry</li>
+                    <li>Real market prices</li>
+                    <li>Season-specific advice</li>
+                </ul>
+                <a href="{{ url_for('crop_recommendation') }}" class="btn btn-primary">Start</a>
+            </div>
+
+            <!-- Feature 2: Disease Detection -->
+            <div class="feature-card">
+                <div class="feature-icon">Detect</div>
+                <h3 class="feature-title">Disease Detection</h3>
+                <p class="feature-description">Upload leaf photos to detect diseases instantly with 95%+ accuracy</p>
+                <ul class="feature-list">
+                    <li>Camera + upload support</li>
+                    <li>38 disease classes</li>
+                    <li>Treatment protocols</li>
+                    <li>Real-time processing</li>
+                </ul>
+                <a href="{{ url_for('disease_detection') }}" class="btn btn-primary">Start</a>
+            </div>
+
+            <!-- Feature 3: Loan Estimator -->
+            <div class="feature-card">
+                <div class="feature-icon">Finance</div>
+                <h3 class="feature-title">Loan Estimator</h3>
+                <p class="feature-description">Calculate investment needs and access NABARD loans with ease</p>
+                <ul class="feature-list">
+                    <li>Cost breakdown</li>
+                    <li>ROI calculation</li>
+                    <li>NABARD integration</li>
+                    <li>Insurance options</li>
+                </ul>
+                <a href="{{ url_for('loan_estimator') }}" class="btn btn-primary">Start</a>
+            </div>
+
+            <!-- Feature 4: Storage Management -->
+            <div class="feature-card">
+                <div class="feature-icon">Storage</div>
+                <h3 class="feature-title">Storage Management</h3>
+                <p class="feature-description">Monitor crop storage with smart alerts and market recommendations</p>
+                <ul class="feature-list">
+                    <li>Shelf-life tracking</li>
+                    <li>Dynamic alerts</li>
+                    <li>Market integration</li>
+                    <li>Sell recommendations</li>
+                </ul>
+                <a href="{{ url_for('storage_register') }}" class="btn btn-primary">Start</a>
+            </div>
+
+            <!-- Feature 5: Knowledge Hub -->
+            <div class="feature-card">
+                <div class="feature-icon">News</div>
+                <h3 class="feature-title">Knowledge Hub</h3>
+                <p class="feature-description">Daily tips, government schemes, and market price forecasts</p>
+                <ul class="feature-list">
+                    <li>Daily farming tips</li>
+                    <li>Government schemes</li>
+                    <li>Real-time prices</li>
+                    <li>30-day forecasts</li>
+                </ul>
+                <a href="{{ url_for('knowledge_hub') }}" class="btn btn-primary">Start</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section
+    style="background: linear-gradient(135deg, rgba(184, 212, 184, 0.3) 0%, var(--warm-cream) 100%); padding: 60px 24px;">
+    <div class="container text-center">
+        <h2 class="section-title">Ready to Start Your Journey?</h2>
+        <p class="section-subtitle" style="max-width: 600px; margin: 0 auto 2rem;">
+            Join thousands of farmers across India who are using AI to make smarter farming decisions
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('crop_recommendation') }}" class="btn btn-primary">Get Started</a>
+            <a href="{{ url_for('knowledge_hub') }}" class="btn btn-secondary">Learn More</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Hero carousel auto-advance
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-slide');
+    const totalSlides = slides.length;
+
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === index) {
+                slide.classList.add('active');
+            }
+        });
+    }
+
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        showSlide(currentSlide);
+    }
+
+    // Auto-advance every 5 seconds
+    setInterval(nextSlide, 5000);
+</script>
+{% endblock %}

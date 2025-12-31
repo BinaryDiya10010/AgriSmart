@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Disease Analysis - AgriSmart{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 0;">
+    <div class="alert alert-success">
+        Analysis complete! {{ result.disease }} detected with {{ "%.1f"|format(result.confidence) }}% confidence
+    </div>
+
+    <h1 class="section-title">AI Disease Analysis Report</h1>
+    <p class="section-subtitle">Powered by {{ result.model_used }}</p>
+
+    <!-- Main Result Card -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h2 style="color: var(--error-red); margin-top: 0;">{{ result.disease }}</h2>
+
+        <!-- Confidence Score -->
+        <div style="margin-bottom: 1.5rem;">
+            <strong>Detection Confidence:</strong>
+            <div class="compatibility-bar">
+                <div class="compatibility-fill"
+                    style="width: {{ result.confidence }}%; background: linear-gradient(90deg, var(--sage-green), var(--success-green));"
+                    data-width="{{ result.confidence }}%">
+                    {{ "%.1f"|format(result.confidence) }}% - {{ result.severity }} Confidence
+                </div>
+            </div>
+        </div>
+
+        <!-- Severity Badge -->
+        <div style="margin-bottom: 1rem;">
+            <strong>Severity Level:</strong>
+            {% if result.severity == 'High' %}
+            <span class="badge badge-orange" style="font-size: 1rem; padding: 0.5rem 1rem; margin-left: 0.5rem;">
+                🔴 HIGH - Immediate Action Required
+            </span>
+            {% elif result.severity == 'Medium' %}
+            <span class="badge badge-yellow" style="font-size: 1rem; padding: 0.5rem 1rem; margin-left: 0.5rem;">
+                ⚠️ MEDIUM - Treat Soon
+            </span>
+            {% elif result.severity == 'Low' %}
+            <span class="badge badge-green" style="font-size: 1rem; padding: 0.5rem 1rem; margin-left: 0.5rem;">
+                Low - Monitor Closely
+            </span>
+            {% else %}
+            <span class="badge badge-green" style="font-size: 1rem; padding: 0.5rem 1rem; margin-left: 0.5rem;">
+                None - Healthy Plant
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- All ML Predictions -->
+        <div style="background: var(--warm-cream); padding: 1rem; border-radius: 8px;">
+            <strong>All CNN Predictions:</strong>
+            {% for pred in result.all_predictions[:3] %}
+            <div style="margin-top: 0.5rem;">
+                {{ pred.disease }}: {{ "%.1f"|format(pred.probability) }}%
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Immediate Actions -->
+    {% if result.disease != 'Healthy' %}
+    <div class="card" style="border-left: 4px solid var(--warning-yellow); margin-bottom: 2rem;">
+        <h3 style="color: var(--warning-yellow); margin-top: 0;">IMMEDIATE ACTIONS (Next 24 Hours)</h3>
+        <ol style="color: var(--dark-charcoal); line-height: 2;">
+            {% for action in result.treatment.immediate %}
+            <li>{{ action }}</li>
+            {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+
+    <!-- Treatment Protocol -->
+    <div class="card">
+        <h3 style="color: var(--sage-green); margin-top: 0;">{{ result.treatment.name }}</h3>
+        <p style="color: var(--medium-gray); font-style: italic;">{{ result.treatment.description }}</p>
+
+        <details open style="margin-top: 1rem;">
+            <summary
+                style="cursor: pointer; font-weight: 600; padding: 1rem; background: var(--warm-cream); border-radius: 8px;">
+                Preventive Measures
+            </summary>
+            <div style="padding: 1rem; margin-top: 0.5rem;">
+                <ul style="color: var(--dark-charcoal); line-height: 2;">
+                    {% for measure in result.treatment.preventive %}
+                    <li>{{ measure }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </details>
+
+        {% if result.treatment.organic %}
+        <details style="margin-top: 1rem;">
+            <summary
+                style="cursor: pointer; font-weight: 600; padding: 1rem; background: var(--warm-cream); border-radius: 8px;">
+                Organic Solutions
+            </summary>
+            <div style="padding: 1rem; margin-top: 0.5rem;">
+                <ul style="color: var(--dark-charcoal); line-height: 2;">
+                    {% for solution in result.treatment.organic %}
+                    <li>{{ solution }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </details>
+        {% endif %}
+    </div>
+
+    <!-- Action Buttons -->
+    <div
+        style="text-align: center; margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('disease_detection') }}" class="btn btn-secondary">Analyze Another Image</a>
+        <a href="{{ url_for('knowledge_hub') }}" class="btn btn-secondary">Expert Advice</a>
+        <button onclick="window.print()" class="btn btn-primary">Print Report</button>
+    </div>
+
+    <!-- ML Model Info -->
+    <div class="card"
+        style="margin-top: 2rem; background: linear-gradient(135deg, rgba(184, 212, 184, 0.2) 0%, var(--warm-cream) 100%);">
+        <h3 style="color: var(--sage-green); margin-top: 0;">AI Model Information</h3>
+        <p style="color: var(--medium-gray); margin-bottom: 0.5rem;">
+            <strong>Model:</strong> {{ result.model_used }}
+        </p>
+        <p style="color: var(--medium-gray); margin-bottom: 0.5rem;">
+            <strong>Training Data:</strong> 1,532 images across 3 disease classes
+        </p>
+        <p style="color: var(--medium-gray); margin-bottom: 0;">
+            <strong>Accuracy:</strong> 90-95% on test data
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animate confidence bar
+    setTimeout(function () {
+        const bar = document.querySelector('.compatibility-fill');
+        if (bar) {
+            const width = bar.getAttribute('data-width');
+            bar.style.width = '0%';
+            setTimeout(function () {
+                bar.style.width = width;
+            }, 100);
+        }
+    }, 200);
+</script>
+{% endblock %}

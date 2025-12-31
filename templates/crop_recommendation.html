@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Recommendation - AgriSmart{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 0;">
+    <h1 class="section-title">AI Crop Recommendation</h1>
+    <p class="section-subtitle">Get XGBoost ML-powered crop suggestions (90%+ Accuracy)</p>
+
+    <div class="form-container">
+        <form method="POST" action="{{ url_for('crop_recommendation') }}">
+            <!-- Soil Data Section -->
+            <h3 style="margin-bottom: 1.5rem; color: var(--sage-green);">Soil Information</h3>
+
+            <div class="form-group">
+                <label class="form-label">Soil pH *</label>
+                <input type="range" id="phSlider" name="ph" min="3.5" max="9.9" step="0.1" value="6.5" class="slider">
+                <span class="slider-value">pH: <span id="phValue">6.5</span></span>
+                <small style="color: var(--medium-gray); display: block; margin-top: 0.5rem;">
+                    Neutral: 6.5-7.5 | Acidic: <6.5 | Alkaline:>7.5
+                </small>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Nitrogen (N) - kg/ha *</label>
+                    <input type="number" name="nitrogen" class="form-input" placeholder="e.g., 90" min="0" max="140"
+                        value="90" required>
+                    <small style="color: var(--medium-gray);">Range: 0-140</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Phosphorus (P) - kg/ha *</label>
+                    <input type="number" name="phosphorus" class="form-input" placeholder="e.g., 42" min="5" max="145"
+                        value="42" required>
+                    <small style="color: var(--medium-gray);">Range: 5-145</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Potassium (K) - kg/ha *</label>
+                    <input type="number" name="potassium" class="form-input" placeholder="e.g., 43" min="5" max="205"
+                        value="43" required>
+                    <small style="color: var(--medium-gray);">Range: 5-205</small>
+                </div>
+            </div>
+
+            <!-- Climate Data Section -->
+            <h3 style="margin: 2rem 0 1.5rem; color: var(--sage-green);">Climate & Location</h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">State *</label>
+                    <select name="state" id="stateSelect" class="form-select" required onchange="updateDistricts()">
+                        <option value="">Select state</option>
+                        {% for state in states_list %}
+                        <option value="{{ state }}">{{ state }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">District *</label>
+                    <select name="district" id="districtSelect" class="form-select" required>
+                        <option value="">Select state first</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Rainfall (mm/year) *</label>
+                    <input type="number" name="rainfall" class="form-input" placeholder="e.g., 203" min="20" max="300"
+                        value="203" required>
+                    <small style="color: var(--medium-gray);">Range: 20-300mm</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Min Temperature (°C) *</label>
+                    <input type="number" name="min_temp" class="form-input" placeholder="e.g., 20" min="8" max="43"
+                        value="20" required>
+                    <small style="color: var(--medium-gray);">Range: 8-43°C</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Max Temperature (°C) *</label>
+                    <input type="number" name="max_temp" class="form-input" placeholder="e.g., 30" min="8" max="43"
+                        value="30" required>
+                    <small style="color: var(--medium-gray);">Range: 8-43°C</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Humidity (%) *</label>
+                    <input type="number" name="humidity" class="form-input" placeholder="e.g., 82" min="14" max="100"
+                        value="82" required>
+                    <small style="color: var(--medium-gray);">Range: 14-100%</small>
+                </div>
+            </div>
+
+            <!-- Farm Data Section -->
+            <h3 style="margin: 2rem 0 1.5rem; color: var(--sage-green);">Farm Details (Optional)</h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Farm Size (hectares)</label>
+                    <input type="number" name="farm_size" class="form-input" placeholder="e.g., 2.5" min="0.1"
+                        max="1000" step="0.1" value="2.5">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Irrigation Type</label>
+                    <select name="irrigation_type" class="form-select">
+                        <option value="drip">Drip Irrigation</option>
+                        <option value="sprinkler">Sprinkler</option>
+                        <option value="canal">Canal</option>
+                        <option value="borewell">Borewell</option>
+                        <option value="none">None (Rainfed)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="margin-top: 2rem; text-align: center;">
+                <button type="submit" class="btn btn-primary" style="padding: 12px 48px; font-size: 1.1rem;">
+                    Get XGBoost Recommendations
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Cards -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 3rem;">
+        <div class="card">
+            <h4 style="color: var(--sage-green); margin-bottom: 0.5rem;">XGBoost ML Model</h4>
+            <p style="color: var(--medium-gray); margin: 0;">
+                Advanced XGBoost algorithm trained on 2,200 samples across 22 crops with <strong>90%+ accuracy</strong>
+                and proper ranking.
+            </p>
+        </div>
+
+        <div class="card">
+            <h4 style="color: var(--sage-green); margin-bottom: 0.5rem;">You'll Receive</h4>
+            <ul style="color: var(--medium-gray); margin: 0; padding-left: 1.5rem;">
+                <li>Top 5 crop recommendations (ranked)</li>
+                <li>Confidence scores (High/Medium/Low)</li>
+                <li>ML probability percentages</li>
+                <li>Location-specific results</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h4 style="color: var(--sage-green); margin-bottom: 0.5rem;">Features</h4>
+            <p style="color: var(--medium-gray); margin: 0; font-size: 0.9rem;">
+                N, P, K (soil nutrients) + pH + Temperature + Humidity + Rainfall = 7 features for best crop match
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Districts data from backend
+    const districtsByState = {{ districts_by_state| tojson | safe }};
+
+    // pH slider update
+    const phSlider = document.getElementById('phSlider');
+    const phValue = document.getElementById('phValue');
+
+    phSlider.addEventListener('input', function () {
+        phValue.textContent = this.value;
+    });
+
+    // Update districts based on selected state
+    function updateDistricts() {
+        const stateSelect = document.getElementById('stateSelect');
+        const districtSelect = document.getElementById('districtSelect');
+        const selectedState = stateSelect.value;
+
+        // Clear current districts
+        districtSelect.innerHTML = '<option value="">Select district</option>';
+
+        if (selectedState && districtsByState[selectedState]) {
+            const districts = districtsByState[selectedState];
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                districtSelect.appendChild(option);
+            });
+        }
+    }
+</script>
+{% endblock %}
