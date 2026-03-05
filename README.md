@@ -1,6 +1,6 @@
 # AgriSmart Platform
 
-**किसानों के लिए डिजिटल सलाहकार** - AI-Powered Agricultural Advisory Platform
+AI-Powered Agricultural Advisory Platform
 
 ## Problem Statement
 
